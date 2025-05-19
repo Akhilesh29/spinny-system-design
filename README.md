@@ -276,6 +276,3 @@ enum class PaymentStatus {
    - API rate limiting
    - Input validation
 
-## How to Run
-1. Compile the code:
-```
