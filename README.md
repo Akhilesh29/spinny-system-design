@@ -1,34 +1,109 @@
 # Spinny System Design Implementation
 
-## High Level Design (HLD)
+## Project Overview
+ This implementation demonstrates a scalable and robust system design that handles user management, car listings, booking inspections, and payment processing. The system is built with a microservices architecture to ensure high availability, scalability, and maintainability.
 
-### System Components
-1. **User Management System**
-   - User registration and authentication
-   - Profile management
-   - Role-based access (Buyer, Seller, Admin)
+## System Architecture
 
-2. **Car Inventory Management**
-   - Car listing and details
-   - Search and filtering
-   - Inventory tracking
+### High Level Architecture
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      Client Layer                           │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
+│  │ Web Client  │  │ Mobile App  │  │ Admin Dashboard     │  │
+│  └─────────────┘  └─────────────┘  └─────────────────────┘  │
+└───────────────────────────┬─────────────────────────────────┘
+                            │
+┌───────────────────────────▼─────────────────────────────────┐
+│                      API Gateway                            │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
+│  │ Auth        │  │ Rate        │  │ Request             │  │
+│  │ Service     │  │ Limiting    │  │ Routing             │  │
+│  └─────────────┘  └─────────────┘  └─────────────────────┘  │
+└───────────────────────────┬─────────────────────────────────┘
+                            │
+┌───────────────────────────▼─────────────────────────────────┐
+│                    Core Services Layer                       │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
+│  │ User        │  │ Car         │  │ Booking            │  │
+│  │ Service     │  │ Service     │  │ Service            │  │
+│  └─────────────┘  └─────────────┘  └─────────────────────┘  │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
+│  │ Payment     │  │ Search      │  │ Notification        │  │
+│  │ Service     │  │ Service     │  │ Service            │  │
+│  └─────────────┘  └─────────────┘  └─────────────────────┘  │
+└───────────────────────────┬─────────────────────────────────┘
+                            │
+┌───────────────────────────▼─────────────────────────────────┐
+│                    Data Storage Layer                        │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
+│  │ Primary     │  │ Cache       │  │ File Storage       │  │
+│  │ Database    │  │ (Redis)     │  │ (Images/Docs)      │  │
+│  └─────────────┘  └─────────────┘  └─────────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+```
 
-3. **Search and Discovery**
-   - Advanced search functionality
-   - Filters (price, location, make, model)
-   - Sorting options
+### Component Interaction Flow
+```
+┌─────────┐     ┌─────────┐     ┌─────────┐     ┌─────────┐
+│  User   │────▶│  Car    │────▶│ Booking │────▶│ Payment │
+└─────────┘     └─────────┘     └─────────┘     └─────────┘
+     │              │                │                │
+     │              ▼                ▼                ▼
+     │          ┌─────────────────────────────────────────┐
+     └─────────▶│            Notification Service         │
+                └─────────────────────────────────────────┘
+```
 
-4. **Booking and Inspection System**
-   - Car inspection scheduling
-   - Booking management
-   - Status tracking
+## Detailed Component Description
 
-5. **Payment System**
-   - Payment processing
-   - Transaction history
-   - Refund management
+### 1. Client Layer
+- **Web Client**: Browser-based interface for users
+- **Mobile App**: Native mobile applications for iOS and Android
+- **Admin Dashboard**: Internal tool for system management
 
-### Database Schema
+### 2. API Gateway
+- **Authentication**: Handles user authentication and authorization
+- **Rate Limiting**: Prevents abuse and ensures fair usage
+- **Request Routing**: Directs requests to appropriate services
+
+### 3. Core Services
+- **User Service**
+  - User registration and authentication
+  - Profile management
+  - Role-based access control
+
+- **Car Service**
+  - Car listing management
+  - Inventory tracking
+  - Car status updates
+
+- **Booking Service**
+  - Inspection scheduling
+  - Booking management
+  - Status tracking
+
+- **Payment Service**
+  - Payment processing
+  - Transaction management
+  - Refund handling
+
+- **Search Service**
+  - Advanced search functionality
+  - Filtering and sorting
+  - Results pagination
+
+- **Notification Service**
+  - Email notifications
+  - SMS alerts
+  - In-app notifications
+
+### 4. Data Storage Layer
+- **Primary Database**: Stores core business data
+- **Cache**: Improves performance for frequently accessed data
+- **File Storage**: Manages car images and documents
+
+## Database Schema
 ```
 Users
 - user_id (PK)
@@ -100,7 +175,6 @@ class Car {
     int mileage;
     string location;
     CarStatus status;
-    // Methods for car operations
 };
 
 enum class CarStatus {
@@ -137,7 +211,6 @@ class Payment {
     int bookingId;
     double amount;
     PaymentStatus status;
-    // Methods for payment operations
 };
 
 enum class PaymentStatus {
@@ -164,38 +237,45 @@ enum class PaymentStatus {
    - Multiple payment methods
    - Transaction history
 
+## Implementation Details
+
+### Key Features
+1. **User Management**
+   - Secure authentication
+   - Role-based permissions
+   - Profile customization
+
+2. **Car Management**
+   - Detailed car listings
+   - Real-time status updates
+   - Image management
+
+3. **Booking System**
+   - Automated scheduling
+   - Status tracking
+   - Inspection management
+
+4. **Payment Processing**
+   - Secure transactions
+   - Multiple payment methods
+   - Transaction history
+
+### Security Measures
+1. **Authentication**
+   - JWT-based authentication
+   - Password hashing
+   - Session management
+
+2. **Data Protection**
+   - Encryption at rest
+   - Secure communication
+   - Regular backups
+
+3. **Access Control**
+   - Role-based permissions
+   - API rate limiting
+   - Input validation
+
 ## How to Run
 1. Compile the code:
-```bash
-g++ -std=c++17 main.cpp -o spinny
 ```
-
-2. Run the executable:
-```bash
-./spinny
-```
-
-## Output Screenshots
-
-Below is the output from running the Spinny system demo:
-
-```
-Users:
-Buyer: Alice, Email: alice@example.com, Role: BUYER
-Seller: Bob, Email: bob@example.com, Role: SELLER
-Admin: Admin, Email: admin@spinny.com, Role: ADMIN
-
-Car Listing:
-Car: Toyota Corolla, Year: 2018, Price: 800000, Location: Delhi, Status: AVAILABLE
-
-Booking:
-Booking ID: 201, Car ID: 201, Buyer ID: 1, Status: PENDING
-
-Payment:
-Payment ID: 301, Booking ID: 201, Amount: 800000, Status: PENDING
-
---- After Status Updates ---
-Car Status: BOOKED
-Booking Status: CONFIRMED
-Payment Status: COMPLETED
-``` 
